@@ -30,7 +30,7 @@ if __name__ == '__main__':
     realA, realB = functions.read_two_domains(opt)
     functions.adjust_scales2image(realA, opt)
     train(opt, Gs, Zs, reals, NoiseAmp, Gs2, Zs2, reals2, NoiseAmp2)
-    TuiGAN_generate(Gs, Zs, reals, NoiseAmp, Gs2, Zs2, reals2, NoiseAmp2, opt)
+    generate(Gs, Zs, reals, NoiseAmp, Gs2, Zs2, reals2, NoiseAmp2, opt)
 
 # elapsed = (time.clock() - start)
 # print("Time used:",elapsed)

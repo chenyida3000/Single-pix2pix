@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from models.SinPix2pix import *
 from options.config import get_arguments
 
-def TuiGAN_generate(Gs,Zs,reals,NoiseAmp, Gs2,Zs2,reals2,NoiseAmp2, opt,in_s=None,gen_start_scale=0):
+def generate(Gs, Zs, reals, NoiseAmp, Gs2, Zs2, reals2, NoiseAmp2, opt, in_s=None, gen_start_scale=0):
     if in_s is None:
         in_s = torch.full(reals[0].shape, 0, device=opt.device)
     x_ab = in_s
