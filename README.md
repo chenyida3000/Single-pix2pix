@@ -1,8 +1,8 @@
-# TuiGAN-PyTorch
-Official PyTorch Implementation of "[TuiGAN: Learning Versatile Image-to-Image Translation with Two Unpaired Images](https://arxiv.org/abs/2004.04634)"
+# Single-pix2pix
+Official PyTorch Implementation of Single-pix2pix
 
-## TuiGAN's applications
-TuiGAN can be use for various computer vision tasks ranging from image style transfer to object transformation and appearance transformation:
+## Single-pix2pix's applications
+Single-pix2pix can be use for various computer vision tasks ranging from image style transfer to object transformation and appearance transformation:
  ![](imgs/examples.jpg)
 
 ## Usage
@@ -16,7 +16,7 @@ python -m pip install -r requirements.txt
 Our code was tested with python 3.6  and PyToch 1.0.0
 
 ###  Train
-To train TuiGAN model on two unpaired images, put the first training image under `datas/task_name/trainA` and the second training image under `datas/task_name/trainB`, and run
+To train Single-pix2pix model on two unpaired images, put the first training image under `datas/task_name/trainA` and the second training image under `datas/task_name/trainB`, and run
 
 ```
 python train.py --input_name <input_name> --root <datas/task_name>

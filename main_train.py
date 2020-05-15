@@ -16,11 +16,8 @@ if __name__ == '__main__':
     Gs = []
     Zs = []
     images1 = []
-    NoiseAmp = []
-    Gs2 = []
-    Zs2 = []
     images2 = []
-    NoiseAmp2 = []
+    NoiseAmp = []
     dir2save = functions.generate_dir2save(opt)
 
     try:
@@ -29,7 +26,7 @@ if __name__ == '__main__':
         pass
     image1, image2 = functions.read_training_pair(opt)
     functions.adjust_scales2image(image1, opt)
-    train(opt, Gs, Zs, images1, NoiseAmp, Gs2, Zs2, images2, NoiseAmp2)
+    train(opt, Gs, Zs, images1, images2, NoiseAmp)
     generate(Gs, Zs, images1, NoiseAmp, opt)
 
 # elapsed = (time.clock() - start)

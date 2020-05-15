@@ -34,9 +34,9 @@ if __name__ == '__main__':
             os.makedirs(dir2save)
         except OSError:
             pass
-        image2 = functions.read_target_image(opt) #读入原始image2（在这个函数中只是用来为ref参考，做规格修改）!!!!!!!!!!!!!!!!!!!!!!!
+        image2 = functions.read_target_image(opt) #读入原始image2（在这个函数中只是用来为ref参考，做规格修改）
         image2 = functions.adjust_scales2image(image2, opt) # 根据原始image2决定scale
-        Gs, Zs, images2, NoiseAmp = functions.load_trained_pyramid(opt) # 这个函数应该也要自己写!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        Gs, Zs, images2, NoiseAmp = functions.load_trained_pyramid(opt)
         if (opt.paint_start_scale < 1) | (opt.paint_start_scale > (len(Gs)-1)):
             print("injection scale should be between 1 and %d" % (len(Gs)-1))
         else: # 读取ref
@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 test_image = test_image[:, :, :image2.shape[2], :image2.shape[3]]
             #修改ref并创建pyramid
             test_image = imresize(test_image, opt.scale1, opt)
-            test_images = functions.creat_reals_pyramid(test_image, test_images, opt)#!!!!!!!!!!!!!!!!!!!!!!!!!
+            test_images = functions.creat_reals_pyramid(test_image, test_images, opt)
             #下面是下采样到最低层，然后上采样到N-1层
             N = len(images2) - 1
             n = opt.paint_start_scale

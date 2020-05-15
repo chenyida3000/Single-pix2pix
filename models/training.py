@@ -39,14 +39,14 @@ class TVLoss(nn.Module):
         return t.size()[1]*t.size()[2]*t.size()[3]
 
 
-def train(opt,Gs,Zs,reals,NoiseAmp, Gs2,Zs2,reals2,NoiseAmp2):
-    real_, real_2 = functions.read_two_domains(opt)
+def train(opt, Gs, Zs, reals1, reals2, NoiseAmp):
+    real_1, real_2 = functions.read_two_domains(opt)
     in_s = 0
     in_s2 = 0
     scale_num = 0
-    real = imresize(real_,opt.scale1,opt)
+    real1 = imresize(real_1,opt.scale1,opt)
     real2 = imresize(real_2,opt.scale1,opt)
-    reals = functions.creat_reals_pyramid(real,reals,opt)
+    reals1 = functions.creat_reals_pyramid(real1,reals1,opt)
     reals2 = functions.creat_reals_pyramid(real2,reals2,opt)
     nfc_prev = 0
     
@@ -71,7 +71,7 @@ def train(opt,Gs,Zs,reals,NoiseAmp, Gs2,Zs2,reals2,NoiseAmp2):
             #D_curr2.load_state_dict(torch.load('%s/%d/netD2.pth' % (opt.out_,scale_num-1)))
         
         #z_curr,in_s,G_curr, z_curr2,in_s2,G_curr2 = train_single_scale(D_curr,G_curr, reals,Gs,Zs,in_s,NoiseAmp, D_curr2,G_curr2, reals2,Gs2,Zs2,in_s2,NoiseAmp2, opt,scale_num)
-        z_curr,in_s,G_curr = train_single_scale(D_curr,G_curr, reals,Gs,Zs,in_s,NoiseAmp, reals2, opt,scale_num)
+        z_curr,in_s,G_curr = train_single_scale(D_curr, G_curr, reals1, Gs, Zs, in_s, NoiseAmp, reals2, opt, scale_num)
 
         G_curr = functions.reset_grads(G_curr,False)
         G_curr.eval()
@@ -84,10 +84,9 @@ def train(opt,Gs,Zs,reals,NoiseAmp, Gs2,Zs2,reals2,NoiseAmp2):
 
         torch.save(Zs, '%s/Zs.pth' % (opt.out_))
         torch.save(Gs, '%s/Gs.pth' % (opt.out_))
-        torch.save(reals, '%s/reals.pth' % (opt.out_))
-        torch.save(NoiseAmp, '%s/NoiseAmp.pth' % (opt.out_))
-
+        torch.save(reals1, '%s/reals1.pth' % (opt.out_))
         torch.save(reals2, '%s/reals2.pth' % (opt.out_))
+        torch.save(NoiseAmp, '%s/NoiseAmp.pth' % (opt.out_))
 
         scale_num+=1
         nfc_prev = opt.nfc
@@ -98,7 +97,7 @@ def train(opt,Gs,Zs,reals,NoiseAmp, Gs2,Zs2,reals2,NoiseAmp2):
 def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, scale_num, centers=None):
     real = reals[len(Gs)]
     real2 = reals2[len(Gs)]
-    save_image(denorm(real.data.cpu()), '%s/real_scale.png' % (opt.outf))
+    save_image(denorm(real.data.cpu()), '%s/real_scale1.png' % (opt.outf))
     save_image(denorm(real2.data.cpu()), '%s/real_scale2.png' % (opt.outf))
 
     opt.bsz = real.shape[0]
