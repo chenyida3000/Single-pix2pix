@@ -2,9 +2,11 @@ from options.config import get_arguments
 from utils.manipulate import *
 from models.training import *
 import utils.functions as functions
-#import time
+import time
 
-#start = time.clock()
+#运行代码：python main_train.py --input_name building
+
+start = time.clock()
 
 if __name__ == '__main__':
     parser = get_arguments()
@@ -30,5 +32,5 @@ if __name__ == '__main__':
     train(opt, Gs, Zs, images1, images2, NoiseAmp)
     generate(Gs, Zs, images1, NoiseAmp, opt)
 
-# elapsed = (time.clock() - start)
-# print("Time used:",elapsed)
+elapsed = (time.clock() - start)
+print("Time used:",elapsed)

@@ -11,106 +11,114 @@ import matplotlib.pyplot as plt
 from models.training import *
 from options.config import get_arguments
 
-def generate(Gs, Zs, images1, NoiseAmp, opt, in_s=None, scale_v=1, scale_h=1, n=0, gen_start_scale=0, num_samples=50):
+def generate(Gs, Zs, images1, NoiseAmp, opt, in_s=None, scale_v=1, scale_h=1, n=0, gen_start_scale=0, num_samples=20):
+    # if in_s is None:
+    #     in_s = torch.full(images1[0].shape, 0, device=opt.device)
+    # images_cur = []
+    # x=0
+    #
+    # for G, Z_opt, real_curr, noise_amp in zip(Gs, Zs, images1, NoiseAmp): #从最底层开始
+    #     pad1 = ((opt.ker_size - 1) * opt.num_layer) / 2 #做一些规格计算的准备工作
+    #     m = nn.ZeroPad2d(int(pad1))
+    #     # nzx = (Z_opt.shape[2] - pad1 * 2) * scale_v
+    #     # nzy = (Z_opt.shape[3] - pad1 * 2) * scale_h
+    #     nzx = (Z_opt.shape[2] ) * scale_v
+    #     nzy = (Z_opt.shape[3] ) * scale_h
+    #
+    #     images_prev = images_cur
+    #     images_cur = []
+    #
+    #     for i in range(0,num_samples,1): # for 五十张图像
+    #         if n == 0: #产生噪声
+    #             z_curr = functions.generate_noise([1, nzx, nzy], device=opt.device)
+    #             z_curr = z_curr.expand(1, 3, z_curr.shape[2], z_curr.shape[3])
+    #             z_curr = m(z_curr)
+    #         else: #产生噪声
+    #             z_curr = functions.generate_noise([opt.nc_z, nzx, nzy], device=opt.device)
+    #             # print("z_curr1:", end="")
+    #             # print(z_curr.size())
+    #             z_curr = m(z_curr)
+    #             # print("z_curr2:", end="")
+    #             # print(z_curr.size())
+    #
+    #         if images_prev == []:
+    #             I_prev = m(in_s) # 若images_prev为空（第一次循环），则将输入的in_s作为I_prev
+    #         else:
+    #             I_prev = images_prev[i] # 继承并上采样上一级传过来的图像
+    #             I_prev = imresize(I_prev, 1 / opt.scale_factor, opt)
+    #             if opt.mode != "SR":  # 对 I_prev进行规格修改和上采样
+    #                 I_prev = I_prev[:, :, 0:round(scale_v * images1[n].shape[2]), 0:round(scale_h * images1[n].shape[3])]
+    #                 I_prev = m(I_prev)
+    #                 I_prev = I_prev[:, :, 0:z_curr.shape[2], 0:z_curr.shape[3]]
+    #                 I_prev = functions.upsampling(I_prev, z_curr.shape[2], z_curr.shape[3])
+    #             else:
+    #                 I_prev = m(I_prev)
+    #
+    #         if n < gen_start_scale:
+    #             z_curr = Z_opt
+    #
+    #         #z_in = noise_amp * (z_curr) + real_curr # 噪声 = 噪声+test_image
+    #         print("z_curr:", end="")
+    #         print(z_curr.size())
+    #         # z_in = noise_amp * (z_curr) + I_prev # 噪声 = 噪声+上一级图像
+    #         # if x==0:
+    #         #     z_in = m(z_in) #这一句要删去！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+    #         # x+=1
+    #         z_in = noise_amp * (z_curr)
+    #         print("I_prev:", end="")
+    #         print(I_prev.size())
+    #         print("z_in:", end="")
+    #         print(z_in.size())
+    #         z_in += I_prev  # 噪声 = 噪声+上一级图像
+    #         I_curr = G(z_in.detach(), I_prev)
+    #
+    #         if n == len(images1) - 1: #若层数已到达最顶层，则存储图像
+    #             if opt.mode == 'train':
+    #                 dir2save = '%s/training_result/%s/gen_start_scale=%d' % (opt.out, opt.input_name[:-4], gen_start_scale)
+    #             else:
+    #                 dir2save = functions.generate_dir2save(opt)
+    #             try:
+    #                 os.makedirs(dir2save)
+    #             except OSError:
+    #                 pass
+    #             if (opt.mode != "harmonization") & (opt.mode != "editing") & (opt.mode != "SR") & (opt.mode != "test"):
+    #                 plt.imsave('%s/%d.png' % (dir2save, i), functions.convert_image_np(I_curr.detach()), vmin=0, vmax=1)
+    #         images_cur.append(I_curr) #更新上一级图像
+    #     n += 1 #层数+1
+    # return I_curr.detach()
+
+
     if in_s is None:
         in_s = torch.full(images1[0].shape, 0, device=opt.device)
-    images_cur = []
-    x=0
+    x_ab = in_s
+    # x_aba = in_s
+    count = 0
+    if opt.mode == 'train':
+        dir2save = '%s/%s/gen_start_scale=%d' % (opt.out, opt.input_name, gen_start_scale)
+    else:
+        dir2save = functions.generate_dir2save(opt)
+    try:
+        os.makedirs(dir2save)
+    except OSError:
+        pass
+    for G,Z_opt,real_curr,real_next,noise_amp in zip(Gs,Zs,images1[n:],images1[(n+1):],NoiseAmp):
+        z = functions.generate_noise([3, Z_opt.shape[2] , Z_opt.shape[3] ], device=opt.device)
+        z = z.expand(real_curr.shape[0], 3, z.shape[2], z.shape[3])
+        x_ab = x_ab[:,:,0:real_curr.shape[2],0:real_curr.shape[3]]
+        print("z:", end="")
+        print(z.size())
+        print("x_ab:", end="")
+        print(x_ab.size())
+        z_in = noise_amp*z+real_curr
+        x_ab = G(z_in.detach(),x_ab)
 
-    for G, Z_opt, real_curr, noise_amp in zip(Gs, Zs, images1, NoiseAmp): #从最底层开始
-        pad1 = ((opt.ker_size - 1) * opt.num_layer) / 2 #做一些规格计算的准备工作
-        m = nn.ZeroPad2d(int(pad1))
-        nzx = (Z_opt.shape[2] - pad1 * 2) * scale_v
-        nzy = (Z_opt.shape[3] - pad1 * 2) * scale_h
-
-        images_prev = images_cur
-        images_cur = []
-
-        for i in range(0,num_samples,1): # for 五十张图像
-            if n == 0: #产生噪声
-                z_curr = functions.generate_noise([1, nzx, nzy], device=opt.device)
-                z_curr = z_curr.expand(1, 3, z_curr.shape[2], z_curr.shape[3])
-                z_curr = m(z_curr)
-            else: #产生噪声
-                z_curr = functions.generate_noise([opt.nc_z, nzx, nzy], device=opt.device)
-                # print("z_curr1:", end="")
-                # print(z_curr.size())
-                z_curr = m(z_curr)
-                # print("z_curr2:", end="")
-                # print(z_curr.size())
-
-            if images_prev == []:
-                I_prev = m(in_s) # 若images_prev为空（第一次循环），则将输入的in_s作为I_prev
-            else:
-                I_prev = images_prev[i] # 继承并上采样上一级传过来的图像
-                I_prev = imresize(I_prev, 1 / opt.scale_factor, opt)
-                if opt.mode != "SR":  # 对 I_prev进行规格修改和上采样
-                    I_prev = I_prev[:, :, 0:round(scale_v * images1[n].shape[2]), 0:round(scale_h * images1[n].shape[3])]
-                    I_prev = m(I_prev)
-                    I_prev = I_prev[:, :, 0:z_curr.shape[2], 0:z_curr.shape[3]]
-                    I_prev = functions.upsampling(I_prev, z_curr.shape[2], z_curr.shape[3])
-                else:
-                    I_prev = m(I_prev)
-
-            if n < gen_start_scale:
-                z_curr = Z_opt
-
-            z_in = noise_amp * (z_curr) + real_curr #噪声 = 噪声+test_image
-            # print("z_curr:", end="")
-            # print(z_curr.size())
-            z_in = noise_amp * (z_curr)
-            # if x==0:
-            #     z_in = m(z_in) #这一句要删去！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
-            # x+=1
-            # print("I_prev:", end="")
-            # print(I_prev.size())
-            # print("z_in:", end="")
-            # print(z_in.size())
-            z_in += I_prev  # 噪声 = 噪声+上一级图像
-            I_curr = G(z_in.detach(), I_prev)
-
-            if n == len(images1) - 1: #若层数已到达最顶层，则存储图像
-                if opt.mode == 'train':
-                    dir2save = '%s/training_result/%s/gen_start_scale=%d' % (opt.out, opt.input_name[:-4], gen_start_scale)
-                else:
-                    dir2save = functions.generate_dir2save(opt)
-                try:
-                    os.makedirs(dir2save)
-                except OSError:
-                    pass
-                if (opt.mode != "harmonization") & (opt.mode != "editing") & (opt.mode != "SR") & (opt.mode != "test"):
-                    plt.imsave('%s/%d.png' % (dir2save, i), functions.convert_image_np(I_curr.detach()), vmin=0, vmax=1)
-            images_cur.append(I_curr) #更新上一级图像
-        n += 1 #层数+1
-    return I_curr.detach()
-
-
-    # if in_s is None:
-    #     in_s = torch.full(reals[0].shape, 0, device=opt.device)
-    # x_ab = in_s
-    # # x_aba = in_s
-    # count = 0
-    # if opt.mode == 'train':
-    #     dir2save = '%s/%s/gen_start_scale=%d' % (opt.out, opt.input_name, gen_start_scale)
-    # else:
-    #     dir2save = functions.generate_dir2save(opt)
-    # try:
-    #     os.makedirs(dir2save)
-    # except OSError:
-    #     pass
-    # for G,Z_opt,real_curr,real_next,noise_amp in zip(Gs,Zs,reals,reals[1:],NoiseAmp):
-    #     z = functions.generate_noise([3, Z_opt.shape[2] , Z_opt.shape[3] ], device=opt.device)
-    #     z = z.expand(real_curr.shape[0], 3, z.shape[2], z.shape[3])
-    #     x_ab = x_ab[:,:,0:real_curr.shape[2],0:real_curr.shape[3]]
-    #     z_in = noise_amp*z+real_curr
-    #     x_ab = G(z_in.detach(),x_ab)
-    #
-    #     # x_aba = G2(x_ab,x_aba)
-    #     x_ab = imresize(x_ab.detach(),1/opt.scale_factor,opt)
-    #     x_ab = x_ab[:,:,0:real_next.shape[2],0:real_next.shape[3]]
-    #     # x_aba = imresize(x_aba.detach(),1/opt.scale_factor,opt)
-    #     # x_aba = x_aba[:,:,0:real_next.shape[2],0:real_next.shape[3]]
-    #     count += 1
-    #     plt.imsave('%s/x_ab_%d.png' % (dir2save,count), functions.convert_image_np(x_ab.detach()), vmin=0,vmax=1)
+        # x_aba = G2(x_ab,x_aba)
+        x_ab = imresize(x_ab.detach(),1/opt.scale_factor,opt)
+        x_ab = x_ab[:,:,0:real_next.shape[2],0:real_next.shape[3]]
+        # x_aba = imresize(x_aba.detach(),1/opt.scale_factor,opt)
+        # x_aba = x_aba[:,:,0:real_next.shape[2],0:real_next.shape[3]]
+        count += 1
+        plt.imsave('%s/x_ab_%d.png' % (dir2save,count), functions.convert_image_np(x_ab.detach()), vmin=0,vmax=1)
+    return x_ab.detach()
 
 

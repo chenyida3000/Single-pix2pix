@@ -201,7 +201,7 @@ def load_trained_pyramid(opt):
     if os.path.exists(dir):
         Gs = torch.load('%s/Gs.pth' % dir)
         Zs = torch.load('%s/Zs.pth' % dir)
-        reals = torch.load('%s/reals.pth' % dir)
+        reals = torch.load('%s/reals1.pth' % dir)
         NoiseAmp = torch.load('%s/NoiseAmp.pth' % dir)
     else:
         print('no appropriate trained model is exist, please train first')
@@ -216,7 +216,7 @@ def load_trained_two_pyramid(opt, mode_='train'):
     if(os.path.exists(dir)):
         Gs = torch.load('%s/Gs.pth' % dir)
         Zs = torch.load('%s/Zs.pth' % dir)
-        reals = torch.load('%s/reals.pth' % dir)
+        reals = torch.load('%s/reals1.pth' % dir)
         NoiseAmp = torch.load('%s/NoiseAmp.pth' % dir)
         Gs2 = torch.load('%s/Gs2.pth' % dir)
         Zs2 = torch.load('%s/Zs2.pth' % dir)
@@ -235,8 +235,8 @@ def generate_dir2save(opt):
     #    dir2save = 'Checkpoints/art/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
         dir2save = 'Trained_models/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
     elif opt.mode == 'load_trained_model':
-        dir2save = 'Checkpoints/art/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.scale_factor_init, opt.noise_amp, opt.lambda_cyc, opt.lambda_idt)
-    #    dir2save = 'Trained_models/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
+    #    dir2save = 'Checkpoints/art/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.scale_factor_init, opt.noise_amp, opt.lambda_cyc, opt.lambda_idt)
+        dir2save = 'Trained_models/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
     elif opt.mode == 'test':
         dir2save = '%s/test/%s' % (opt.out, opt.input_name)
         if opt.quantization_flag:

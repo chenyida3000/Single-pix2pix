@@ -50,10 +50,11 @@ if __name__ == '__main__':
             #下面是下采样到最低层，然后上采样到N-1层
             N = len(images2) - 1
             n = opt.paint_start_scale
-            in_s = imresize(test_image, pow(opt.scale_factor, (N - n + 1)), opt)
-            in_s = in_s[:, :, :images2[n - 1].shape[2], :images2[n - 1].shape[3]]
-            in_s = imresize(in_s, 1 / opt.scale_factor, opt)
-            in_s = in_s[:, :, :images2[n].shape[2], :images2[n].shape[3]]
+            # in_s = imresize(test_image, pow(opt.scale_factor, (N - n)), opt)
+            # in_s = in_s[:, :, :images2[n - 1].shape[2], :images2[n - 1].shape[3]]
+            # in_s = imresize(in_s, 1 / opt.scale_factor, opt)
+            # in_s = in_s[:, :, :images2[n].shape[2], :images2[n].shape[3]]
+            in_s = test_images[n]
             # if opt.quantization_flag:
             #     opt.mode = 'paint_train'
             #     dir2trained_model = functions.generate_dir2save(opt)
@@ -78,10 +79,10 @@ if __name__ == '__main__':
             #         train_paint(opt, Gs, Zs, reals, NoiseAmp, centers, opt.paint_start_scale)
             #         opt.mode = 'paint2image'
             #out = generate(Gs[n:], Zs[n:], reals, NoiseAmp[n:], opt, in_s, n=n, num_samples=1)
-            # print("in_s:", end="")
-            # print(in_s.size())
-            # print("images2[n]:", end="")
-            # print(images2[n].size())
+            print("in_s:", end="")
+            print(in_s.size())
+            print("images2[n]:", end="")
+            print(images2[n].size())
             out = generate(Gs[n:], Zs[n:], test_images, NoiseAmp[n:], opt, in_s, n=n, gen_start_scale=opt.paint_start_scale, num_samples=1) # 上采样后的ref作为in_s传入,这个函数一定要改!!!!!!!!!!!!!!!
             #plt.imsave('%s/start_scale=%d.png' % (dir2save, opt.paint_start_scale), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
             plt.imsave('%s/%s.png' % (dir2save, opt.test_name), functions.convert_image_np(out.detach()), vmin=0, vmax=1)

@@ -40,7 +40,7 @@ class TVLoss(nn.Module):
 
 
 def train(opt, Gs, Zs, reals1, reals2, NoiseAmp):
-    real_1, real_2 = functions.read_two_domains(opt)
+    real_1, real_2 = functions.read_training_pair(opt)
     in_s = 0
     in_s2 = 0
     scale_num = 0
