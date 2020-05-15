@@ -24,6 +24,7 @@ if __name__ == '__main__':
         os.makedirs(dir2save)
     except OSError:
         pass
+
     image1, image2 = functions.read_training_pair(opt)
     functions.adjust_scales2image(image1, opt)
     train(opt, Gs, Zs, images1, images2, NoiseAmp)

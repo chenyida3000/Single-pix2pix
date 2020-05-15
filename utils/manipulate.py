@@ -15,6 +15,8 @@ def generate(Gs, Zs, images1, NoiseAmp, opt, in_s=None, scale_v=1, scale_h=1, n=
     if in_s is None:
         in_s = torch.full(images1[0].shape, 0, device=opt.device)
     images_cur = []
+    x=0
+
     for G, Z_opt, real_curr, noise_amp in zip(Gs, Zs, images1, NoiseAmp): #从最底层开始
         pad1 = ((opt.ker_size - 1) * opt.num_layer) / 2 #做一些规格计算的准备工作
         m = nn.ZeroPad2d(int(pad1))
@@ -31,7 +33,11 @@ def generate(Gs, Zs, images1, NoiseAmp, opt, in_s=None, scale_v=1, scale_h=1, n=
                 z_curr = m(z_curr)
             else: #产生噪声
                 z_curr = functions.generate_noise([opt.nc_z, nzx, nzy], device=opt.device)
+                # print("z_curr1:", end="")
+                # print(z_curr.size())
                 z_curr = m(z_curr)
+                # print("z_curr2:", end="")
+                # print(z_curr.size())
 
             if images_prev == []:
                 I_prev = m(in_s) # 若images_prev为空（第一次循环），则将输入的in_s作为I_prev
@@ -49,7 +55,18 @@ def generate(Gs, Zs, images1, NoiseAmp, opt, in_s=None, scale_v=1, scale_h=1, n=
             if n < gen_start_scale:
                 z_curr = Z_opt
 
-            z_in = noise_amp * (z_curr) + real_curr #噪声 = 噪声+上一级图像
+            z_in = noise_amp * (z_curr) + real_curr #噪声 = 噪声+test_image
+            # print("z_curr:", end="")
+            # print(z_curr.size())
+            z_in = noise_amp * (z_curr)
+            # if x==0:
+            #     z_in = m(z_in) #这一句要删去！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+            # x+=1
+            # print("I_prev:", end="")
+            # print(I_prev.size())
+            # print("z_in:", end="")
+            # print(z_in.size())
+            z_in += I_prev  # 噪声 = 噪声+上一级图像
             I_curr = G(z_in.detach(), I_prev)
 
             if n == len(images1) - 1: #若层数已到达最顶层，则存储图像

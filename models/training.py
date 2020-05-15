@@ -129,11 +129,19 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
     loss_print = {}
 
     for epoch in range(opt.niter):
-        noise_ = functions.generate_noise([3,opt.nzx,opt.nzy], device=opt.device)
-        noise_ = m_noise(noise_.expand(opt.bsz,3,opt.nzx,opt.nzy))
+        if (Gs == []) & (opt.mode != 'SR_train'):
+            z_opt = functions.generate_noise([1,opt.nzx,opt.nzy], device=opt.device) #第N层，作者对每一个周期都做了一次Z采样（Github上有人做了fix_Z实验，肉眼上看无明显效果区别）
+            z_opt = m_noise(z_opt.expand(1,3,opt.nzx,opt.nzy))#好奇怪，这里为什么不直接创建（3，3，3）图像，然后m_noise？
+            noise_ = functions.generate_noise([1,opt.nzx,opt.nzy], device=opt.device)
+            noise_ = m_noise(noise_.expand(1,3,opt.nzx,opt.nzy))#noise_和z_opt有什么区别吗
+        else:
+            noise_ = functions.generate_noise([opt.nc_z,opt.nzx,opt.nzy], device=opt.device)
+            noise_ = m_noise(noise_)
+        #noise_ = functions.generate_noise([3,opt.nzx,opt.nzy], device=opt.device)
+        #noise_ = m_noise(noise_.expand(opt.bsz,3,opt.nzx,opt.nzy))
         
-        noise_2 = functions.generate_noise([3,opt.nzx,opt.nzy], device=opt.device)
-        noise_2 = m_noise(noise_2.expand(opt.bsz,3,opt.nzx,opt.nzy))
+        # noise_2 = functions.generate_noise([3,opt.nzx,opt.nzy], device=opt.device)
+        # noise_2 = m_noise(noise_2.expand(opt.bsz,3,opt.nzx,opt.nzy))
 
         ############################
         # (1) Update D network
@@ -165,7 +173,7 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
                 prev = m_image(prev)
 
             noise = opt.noise_amp * noise_ + m_image(real)
-            noise2 = opt.noise_amp2 * noise_2 + m_image(real2)
+            # noise2 = opt.noise_amp2 * noise_2 + m_image(real2)
 
             fake = netG(noise.detach(), prev)
             output = netD(fake.detach())
