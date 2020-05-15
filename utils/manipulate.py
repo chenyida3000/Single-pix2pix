@@ -54,7 +54,7 @@ def generate(Gs, Zs, images1, NoiseAmp, opt, in_s=None, scale_v=1, scale_h=1, n=
 
             if n == len(images1) - 1: #若层数已到达最顶层，则存储图像
                 if opt.mode == 'train':
-                    dir2save = '%s/RandomSamples/%s/gen_start_scale=%d' % (opt.out, opt.input_name[:-4], gen_start_scale)
+                    dir2save = '%s/training_result/%s/gen_start_scale=%d' % (opt.out, opt.input_name[:-4], gen_start_scale)
                 else:
                     dir2save = functions.generate_dir2save(opt)
                 try:

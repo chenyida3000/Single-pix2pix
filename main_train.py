@@ -8,7 +8,7 @@ import utils.functions as functions
 
 if __name__ == '__main__':
     parser = get_arguments()
-    parser.add_argument('--root', help='input image dir', default='datas/apple')
+    parser.add_argument('--input_dir', help='input image dir', default='Input/training_pair')
     parser.add_argument('--input_name', help='input image name', required=True)
     parser.add_argument('--mode', help='task to be done', default='train')
     opt = parser.parse_args()
@@ -27,8 +27,8 @@ if __name__ == '__main__':
         os.makedirs(dir2save)
     except OSError:
         pass
-    realA, realB = functions.read_two_domains(opt)
-    functions.adjust_scales2image(realA, opt)
+    image1, image2 = functions.read_training_pair(opt)
+    functions.adjust_scales2image(image1, opt)
     train(opt, Gs, Zs, images1, NoiseAmp, Gs2, Zs2, images2, NoiseAmp2)
     generate(Gs, Zs, images1, NoiseAmp, opt)
 
