@@ -1,6 +1,6 @@
 from options.config import get_arguments
 from utils.manipulate import *
-from models.SinPix2pix import *
+from models.training import *
 import utils.functions as functions
 #import time
 
@@ -15,11 +15,11 @@ if __name__ == '__main__':
     opt = functions.post_config(opt)
     Gs = []
     Zs = []
-    reals = []
+    images1 = []
     NoiseAmp = []
     Gs2 = []
     Zs2 = []
-    reals2 = []
+    images2 = []
     NoiseAmp2 = []
     dir2save = functions.generate_dir2save(opt)
 
@@ -29,8 +29,8 @@ if __name__ == '__main__':
         pass
     realA, realB = functions.read_two_domains(opt)
     functions.adjust_scales2image(realA, opt)
-    train(opt, Gs, Zs, reals, NoiseAmp, Gs2, Zs2, reals2, NoiseAmp2)
-    generate(Gs, Zs, reals, NoiseAmp, Gs2, Zs2, reals2, NoiseAmp2, opt)
+    train(opt, Gs, Zs, images1, NoiseAmp, Gs2, Zs2, images2, NoiseAmp2)
+    generate(Gs, Zs, images1, NoiseAmp, opt)
 
 # elapsed = (time.clock() - start)
 # print("Time used:",elapsed)

@@ -13,8 +13,6 @@ import random
 from sklearn.cluster import KMeans
 from glob import glob
 
-
-
 def denorm(x):
     out = (x + 1) / 2
     return out.clamp(0, 1)
@@ -129,6 +127,17 @@ def read_two_domains(opt):
             trainB = torch.cat((trainB,y),0)
     return trainA, trainB
 
+def read_image(opt):
+    x = img.imread('%s/%s' % (opt.input_dir,opt.input_name))
+    x = np2torch(x,opt)
+    x = x[:,0:3,:,:]
+    return x
+
+def read_image_dir(dir,opt):
+    x = img.imread('%s' % (dir))
+    x = np2torch(x,opt)
+    x = x[:,0:3,:,:]
+    return x
 
 def np2torch(x,opt):
     if opt.nc_im == 3:
@@ -201,7 +210,6 @@ def load_trained_pyramid(opt, mode_='train'):
     mode = opt.mode
     opt.mode = 'train'
     dir = generate_dir2save(opt)
-
     if os.path.exists(dir):
         Gs = torch.load('%s/Gs.pth' % dir)
         Zs = torch.load('%s/Zs.pth' % dir)
@@ -235,7 +243,16 @@ def load_trained_two_pyramid(opt, mode_='train'):
 def generate_dir2save(opt):
     dir2save = None
     if opt.mode == 'train':
-        dir2save = 'Checkpoints/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
+    #    dir2save = 'Checkpoints/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
+         dir2save = 'Checkpoints/art/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
+    elif (opt.mode == 'paint_train') :
+        dir2save = 'Checkpoints/%s/scale_factor=%f_paint/start_scale=%d' % (opt.input_name[:-4], opt.scale_factor_init,opt.paint_start_scale)
+    elif opt.mode == 'random_samples':
+        dir2save = '%s/RandomSamples/%s/gen_start_scale=%d' % (opt.out,opt.input_name[:-4], opt.gen_start_scale)
+    elif opt.mode == 'test':
+        dir2save = '%s/test/%s/%s_out' % (opt.out, opt.input_name[:-4],opt.ref_name[:-4])
+        if opt.quantization_flag:
+            dir2save = '%s_quantized' % dir2save
     return dir2save
 
 

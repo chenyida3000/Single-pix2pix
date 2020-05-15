@@ -111,13 +111,13 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
     m_image = nn.ZeroPad2d(int(pad_image))
 
     lambda_idt = opt.lambda_idt
-    lambda_cyc = opt.lambda_cyc
+    #lambda_cyc = opt.lambda_cyc
     lambda_tv = opt.lambda_tv
 
     z_opt = torch.full([opt.bsz, opt.nc_z, opt.nzx,opt.nzy], 0, device=opt.device)
     z_opt = m_noise(z_opt)
-    z_opt2 = torch.full([opt.bsz, opt.nc_z, opt.nzx,opt.nzy], 0, device=opt.device)
-    z_opt2 = m_noise(z_opt2)
+    #z_opt2 = torch.full([opt.bsz, opt.nc_z, opt.nzx,opt.nzy], 0, device=opt.device)
+    #z_opt2 = m_noise(z_opt2)
 
     # setup optimizer
     #optimizerD = optim.Adam(itertools.chain(netD.parameters(),netD2.parameters()), lr=opt.lr_d, betas=(opt.beta1, 0.999))
