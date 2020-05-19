@@ -44,10 +44,10 @@ def train(opt, Gs, Zs, reals1, reals2, NoiseAmp):
     in_s = 0
     in_s2 = 0
     scale_num = 0
-    real1 = imresize(real_1,opt.scale1,opt)
-    real2 = imresize(real_2,opt.scale1,opt)
-    reals1 = functions.creat_reals_pyramid(real1,reals1,opt)
-    reals2 = functions.creat_reals_pyramid(real2,reals2,opt)
+    image1 = imresize(real_1,opt.scale1,opt)
+    image2 = imresize(real_2,opt.scale1,opt)
+    reals1 = functions.creat_reals_pyramid(image1,reals1,opt)
+    reals2 = functions.creat_reals_pyramid(image2,reals2,opt)
     nfc_prev = 0
     
     while scale_num<opt.stop_scale+1:
@@ -95,14 +95,14 @@ def train(opt, Gs, Zs, reals1, reals2, NoiseAmp):
 
 
 def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, scale_num, centers=None):
-    real = reals[len(Gs)]
-    real2 = reals2[len(Gs)]
-    save_image(denorm(real.data.cpu()), '%s/real_scale1.png' % (opt.outf))
-    save_image(denorm(real2.data.cpu()), '%s/real_scale2.png' % (opt.outf))
+    image1 = reals[len(Gs)]
+    image2 = reals2[len(Gs)]
+    save_image(denorm(image1.data.cpu()), '%s/real_scale1.png' % (opt.outf))
+    save_image(denorm(image2.data.cpu()), '%s/real_scale2.png' % (opt.outf))
 
-    opt.bsz = real.shape[0]
-    opt.nzx = real.shape[2]
-    opt.nzy = real.shape[3]
+    opt.bsz = image1.shape[0]
+    opt.nzx = image1.shape[2]
+    opt.nzy = image1.shape[3]
 
     pad_noise = 0
     pad_image = 0
@@ -150,7 +150,7 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
             # D(real)
             optimizerD.zero_grad()
 
-            output = netD(real2).to(opt.device)
+            output = netD(image2).to(opt.device)
             errD_real = -output.mean()
             errD_real.backward(retain_graph=True)
             loss_print['errD_real'] = errD_real.item()
@@ -172,7 +172,7 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
                 prev = cycle_rec(Gs, Zs, reals, NoiseAmp, in_s, m_noise, m_image, opt, epoch)
                 prev = m_image(prev)
 
-            noise = opt.noise_amp * noise_ + m_image(real)
+            noise = opt.noise_amp * noise_ + m_image(image1)
             # noise2 = opt.noise_amp2 * noise_2 + m_image(real2)
 
             fake = netG(noise.detach(), prev)
@@ -181,7 +181,7 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
             errD_fake.backward(retain_graph=True)
             loss_print['errD_fake'] = errD_fake.item()
 
-            gradient_penalty = functions.calc_gradient_penalty(netD, real2, fake, opt.lambda_grad, opt.device)
+            gradient_penalty = functions.calc_gradient_penalty(netD, image2, fake, opt.lambda_grad, opt.device)
             gradient_penalty.backward()
             loss_print['gradient_penalty'] = gradient_penalty.item()
 
@@ -200,9 +200,9 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
             loss_print['errG'] = errG.item()
 
             loss = nn.L1Loss()
-            Z_opt2 =  m_image(real2)
+            Z_opt2 =  m_image(image2)
             #rec_loss = lambda_idt*loss(netG(Z_opt2.detach(),z_prev2),real2)
-            rec_loss = lambda_idt * loss(netG(Z_opt2.detach(), z_prev), real2)
+            rec_loss = lambda_idt * loss(netG(Z_opt2.detach(), z_prev), image2)
             rec_loss.backward(retain_graph=True)
             loss_print['rec_loss'] = rec_loss.item()
             rec_loss = rec_loss.detach()
@@ -214,9 +214,11 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
 
         if epoch % 500 == 0 or epoch == (opt.niter-1):
             save_image(denorm(fake.data.cpu()), '%s/fake_sample.png' % (opt.outf))
-            save_image(denorm(netG(Z_opt2.detach(), z_prev).data.cpu()), '%s/rec_sample2.png' % (opt.outf))
-            save_image(denorm(z_opt.data.cpu()), '%s/z_opt.png' % (opt.outf))
-            save_image(denorm(noise.data.cpu()), '%s/noise.png' % (opt.outf))
+            # plt.imsave('%s/G(z_opt).png'    % (opt.outf),  functions.convert_image_np(netG(Z_opt.detach(), z_prev).detach()), vmin=0, vmax=1)
+
+            # save_image(denorm(netG(Z_opt2.detach(), z_prev).data.cpu()), '%s/rec_sample2.png' % (opt.outf))
+            # save_image(denorm(z_opt.data.cpu()), '%s/z_opt.png' % (opt.outf))
+            # save_image(denorm(noise.data.cpu()), '%s/noise.png' % (opt.outf))
             torch.save(z_opt, '%s/z_opt.pth' % (opt.outf))
             
             log = " Iteration [{}/{}]".format(epoch, opt.niter)
@@ -248,7 +250,7 @@ def draw_concat(Gs,Zs,reals,NoiseAmp,in_s,mode,m_noise,m_image,opt):
     return G_z
 
 
-def cycle_rec(Gs, Zs, reals, NoiseAmp, in_s, m_noise, m_image, opt, epoch):
+def cycle_rec(Gs, Zs, reals, NoiseAmp, in_s, m_noise, m_image, opt, bsz):
     x_ab = in_s
     x_aba = in_s
     if len(Gs) > 0:
