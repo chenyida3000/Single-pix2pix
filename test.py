@@ -5,7 +5,7 @@ from utils.imresize import imresize
 from utils.imresize import imresize_to_shape
 import utils.functions as functions
 
-#运行代码：python test.py --input_name the_starry_night --test_name Manhattan --paint_start_scale 1
+#运行代码：python test.py --input_name map1 --test_name test_map --paint_start_scale 1
 
 
 if __name__ == '__main__':
@@ -37,6 +37,7 @@ if __name__ == '__main__':
         image2 = functions.read_target_image(opt) #读入原始image2（在这个函数中只是用来为ref参考，做规格修改）
         image2 = functions.adjust_scales2image(image2, opt) # 根据原始image2决定scale
         Gs, Zs, images2, NoiseAmp = functions.load_trained_pyramid(opt)
+
         if (opt.paint_start_scale < 1) | (opt.paint_start_scale > (len(Gs)-1)):
             print("injection scale should be between 1 and %d" % (len(Gs)-1))
         else: # 读取ref
@@ -78,7 +79,8 @@ if __name__ == '__main__':
             #         train_paint(opt, Gs, Zs, reals, NoiseAmp, centers, opt.paint_start_scale)
             #         opt.mode = 'paint2image'
             #out = generate(Gs[n:], Zs[n:], reals, NoiseAmp[n:], opt, in_s, n=n, num_samples=1)
-            out = generate(Gs[n:], Zs[n:], test_images[n:], NoiseAmp[n:], opt, in_s, num_samples=1) # 上采样后的ref作为in_s传入,这个函数一定要改!!!!!!!!!!!!!!!
+            # plt.imsave('%s/in_s.png' % (dir2save), functions.convert_image_np(in_s.detach()), vmin=0, vmax=1)
+            out = generate(Gs[n:], Zs[n:], test_images[n:], images2, NoiseAmp[n:], opt, in_s, n=n,  num_samples=1) # 上采样后的ref作为in_s传入,这个函数一定要改!!!!!!!!!!!!!!!
             #plt.imsave('%s/start_scale=%d.png' % (dir2save, opt.paint_start_scale), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
             plt.imsave('%s/%s.png' % (dir2save, opt.test_name), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
 

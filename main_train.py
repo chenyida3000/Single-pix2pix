@@ -27,7 +27,7 @@ if __name__ == '__main__':
     image1, image2 = functions.read_training_pair(opt)
     functions.adjust_scales2image(image1, opt)
     train(opt, Gs, Zs, images1, images2, NoiseAmp)
-    generate(Gs, Zs, images1, NoiseAmp, opt)
+    generate(Gs, Zs, images1, images2, NoiseAmp, opt)
 
 # elapsed = (time.clock() - start)
 # print("Time used:",elapsed)

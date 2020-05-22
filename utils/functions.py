@@ -12,6 +12,7 @@ import os
 import random
 from sklearn.cluster import KMeans
 from glob import glob
+import models.model as models
 
 def denorm(x):
     out = (x + 1) / 2
@@ -193,6 +194,32 @@ def creat_reals_pyramid(real,reals,opt):
         reals.append(curr_real)
     return reals
 
+def init_G(opt):
+    # generator initialization
+    num_layer = opt.num_layer
+    opt.num_layer = 9
+    netG = models.GeneratorConcatSkip2CleanAddAlpha(opt).to(opt.device)
+    netG.apply(models.weights_init)
+    if opt.netG != '':
+        netG.load_state_dict(torch.load(opt.netG))
+    # print(netG)
+    opt.num_layer = num_layer
+
+    return netG
+
+def load_G(opt,n):
+    mode = opt.mode
+    opt.mode = 'load_trained_model'
+    dir = generate_dir2save(opt)
+    if os.path.exists(dir):
+        G = init_G(opt)
+        # G.load_state_dict(torch.load('%s/%d/netG.pth' % (dir, n)), strict=False)
+        G.load_state_dict(torch.load('%s/%d/netG.pth' % (dir, n)))
+        Z_opt = torch.load('%s/%d/z_opt.pth' % (dir, n))
+    else:
+        print('no appropriate trained model is exist, please train first')
+    opt.mode = mode
+    return G,Z_opt
 
 def load_trained_pyramid(opt):
     mode = opt.mode
@@ -201,12 +228,12 @@ def load_trained_pyramid(opt):
     if os.path.exists(dir):
         Gs = torch.load('%s/Gs.pth' % dir)
         Zs = torch.load('%s/Zs.pth' % dir)
-        reals = torch.load('%s/reals.pth' % dir)
+        reals2 = torch.load('%s/reals2.pth' % dir)
         NoiseAmp = torch.load('%s/NoiseAmp.pth' % dir)
     else:
         print('no appropriate trained model is exist, please train first')
     opt.mode = mode
-    return Gs,Zs,reals,NoiseAmp
+    return Gs,Zs,reals2,NoiseAmp
 
 
 def load_trained_two_pyramid(opt, mode_='train'):
@@ -235,8 +262,8 @@ def generate_dir2save(opt):
     #    dir2save = 'Checkpoints/art/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
         dir2save = 'Trained_models/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
     elif opt.mode == 'load_trained_model':
-        dir2save = 'Checkpoints/art/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.scale_factor_init, opt.noise_amp, opt.lambda_cyc, opt.lambda_idt)
-    #    dir2save = 'Trained_models/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
+        # dir2save = 'Checkpoints/art/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.scale_factor_init, opt.noise_amp, opt.lambda_cyc, opt.lambda_idt)
+        dir2save = 'Trained_models/%s/scale_factor=%.3f, noise_amp=%.4f, lambda_cyc=%.3f, lambda_idt=%.3f' % (opt.input_name,opt.scale_factor_init,opt.noise_amp,opt.lambda_cyc,opt.lambda_idt)
     elif opt.mode == 'test':
         dir2save = '%s/test/%s' % (opt.out, opt.input_name)
         if opt.quantization_flag:

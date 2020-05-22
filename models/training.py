@@ -40,7 +40,7 @@ class TVLoss(nn.Module):
 
 
 def train(opt, Gs, Zs, reals1, reals2, NoiseAmp):
-    real_1, real_2 = functions.read_two_domains(opt)
+    real_1, real_2 = functions.read_training_pair(opt)
     in_s = 0
     in_s2 = 0
     scale_num = 0
@@ -165,7 +165,7 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
                 prev = m_image(prev)
 
             noise = opt.noise_amp * noise_ + m_image(real)
-            noise2 = opt.noise_amp2 * noise_2 + m_image(real2)
+            # noise2 = opt.noise_amp2 * noise_2 + m_image(real2)
 
             fake = netG(noise.detach(), prev)
             output = netD(fake.detach())

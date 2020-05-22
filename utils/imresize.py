@@ -38,7 +38,7 @@ def torch2uint8(x):
     x = x[0,:,:,:]
     x = x.permute((1,2,0))
     x = 255*denorm(x)
-    x = x.cpu().numpy()
+    x = x.detach().cpu().numpy()
     x = x.astype(np.uint8)
     return x
 
