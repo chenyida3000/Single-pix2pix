@@ -181,6 +181,7 @@ def adjust_scales2image(real_,opt):
     real = imresize(real_, opt.scale1, opt)
     opt.scale_factor = math.pow(opt.min_size/(min(real.shape[2],real.shape[3])),1/(opt.stop_scale))
     scale2stop = math.ceil(math.log(min([opt.max_size, max([real_.shape[2], real_.shape[3]])]) / max([real_.shape[2], real_.shape[3]]),opt.scale_factor_init))
+    # scale2stop = math.ceil(math.log(min([opt.max_size, max([real_.shape[2], real_.shape[3]])]) / max([real_.shape[2], real_.shape[3]]),opt.scale_factor))
     opt.stop_scale = opt.num_scales - scale2stop
     return real
 
@@ -197,7 +198,7 @@ def creat_reals_pyramid(real,reals,opt):
 def init_G(opt):
     # generator initialization
     num_layer = opt.num_layer
-    opt.num_layer = 9
+    opt.num_layer = 5
     netG = models.GeneratorConcatSkip2CleanAddAlpha(opt).to(opt.device)
     netG.apply(models.weights_init)
     if opt.netG != '':

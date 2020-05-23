@@ -21,7 +21,7 @@ def generate(Gs, Zs, images1, images2, NoiseAmp, opt, in_s=None, scale_v=1, scal
 
     # opt.mode = 'load_trained_model'
 
-    for real_curr in images1: #从最底层开始
+    for real_curr in images1[:9]: #从最底层开始!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!暂时性修改，要改回！！！！！！！！！！！！！！！！！！！！！！1
         # print(n)
         # dir = functions.generate_dir2save(opt)
         # if os.path.exists(dir):

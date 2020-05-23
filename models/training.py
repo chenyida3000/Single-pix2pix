@@ -202,7 +202,7 @@ def train_single_scale(netD, netG, reals, Gs, Zs, in_s, NoiseAmp, reals2, opt, s
             optimizerG.step()
 
         if epoch % 25 == 0 or epoch == (opt.niter-1):
-            print('scale %d:[%d/%d]' % (len(Gs), epoch, opt.niter))
+            print('scale {%d/%d}:[%d/%d]' % (len(Gs), opt.stop_scale, epoch, opt.niter))
 
         if epoch % 500 == 0 or epoch == (opt.niter-1):
             save_image(denorm(fake.data.cpu()), '%s/fake_sample.png' % (opt.outf))
