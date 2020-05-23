@@ -18,6 +18,7 @@ def generate(Gs, Zs, images1, images2, NoiseAmp, opt, in_s=None, scale_v=1, scal
     if in_s is None:
         in_s = torch.full(images2[0].shape, 0, device=opt.device)
     images_cur = []
+    noise_amp = 0.05
 
     # opt.mode = 'load_trained_model'
 
@@ -78,14 +79,14 @@ def generate(Gs, Zs, images1, images2, NoiseAmp, opt, in_s=None, scale_v=1, scal
 
             # z_in = noise_amp * z_curr + real_curr #噪声 = 噪声+real图像
             # z_in = z_curr + real_curr  # 噪声 = 噪声+real图像
-            z_in = real_curr # 我觉得这里的real_curr应该加一个M（）函数，但这样一来就和z_curr对不上了
-            # print("z_in:",end="")
-            # print(z_in.size())
-            # print("I_prev", end="")
-            # print(I_prev.size())
+            z_in = noise_amp * z_curr+ real_curr
+            print("z_in:",end="")
+            print(z_in.size())
+            print("I_prev", end="")
+            print(I_prev.size())
             I_curr = G(z_in.detach(), I_prev)
-            # print("I_curr", end="")
-            # print(I_curr.size())
+            print("I_curr", end="")
+            print(I_curr.size())
 
             if opt.mode == 'train':
                 dir2save = '%s/training_result/%s/gen_start_scale=%d' % (opt.out, opt.input_name[:-4], gen_start_scale)
