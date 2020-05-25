@@ -22,33 +22,17 @@ def generate(Gs, Zs, images1, images2, NoiseAmp, opt, in_s=None, scale_v=1, scal
 
     # opt.mode = 'load_trained_model'
 
-    for real_curr in images1[:9]: #从最底层开始!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!暂时性修改，要改回！！！！！！！！！！！！！！！！！！！！！！1
+    for real_curr in images1: #从最底层开始
         # print(n)
-        # dir = functions.generate_dir2save(opt)
-        # if os.path.exists(dir):
-        #     G = init_G(opt)
-        #     # G_curr.load_state_dict(torch.load('%s/%d/netG.pth' % (opt.out_, scale_num - 1)))
-        #     G.load_state_dict(torch.load('%s/%d/netG.pth' % (dir,n)), strict=False)
-        #     Z_opt = torch.load('%s/%d/z_opt.pth' % (dir,n))
-        #     # reals = torch.load('%s/reals.pth' % dir)
-        #     # noise_amp = torch.load('%s/NoiseAmp.pth' % dir)
         opt.nfc = min(opt.nfc_init * pow(2, math.floor(n / 4)), 128)
         opt.min_nfc = min(opt.min_nfc_init * pow(2, math.floor(n / 4)), 128)
-
-        # opt.out_ = functions.generate_dir2save(opt)
-        # opt.outf = '%s/%d' % (opt.out_, n)
         G,Z_opt = functions.load_G(opt,n)
-        # if n==1:
-        #     print(G)
-
-
 
         pad1 = ((opt.ker_size - 1) * opt.num_layer) / 2 #做一些规格计算的准备工作
         m = nn.ZeroPad2d(int(pad1))
         nzx = (Z_opt.shape[2] - pad1 * 2) * scale_v
         nzy = (Z_opt.shape[3] - pad1 * 2) * scale_h
 
-        # images_cur = []
         images_prev = images_cur
         images_cur = []
 
@@ -62,7 +46,8 @@ def generate(Gs, Zs, images1, images2, NoiseAmp, opt, in_s=None, scale_v=1, scal
                 z_curr = m(z_curr)
 
             if images_prev == []:
-                I_prev = m(in_s) # 若images_prev为空（第一次循环），则将输入的in_s作为I_prev
+                # I_prev = m(in_s) # 若images_prev为空（第一次循环），则将输入的in_s作为I_prev
+                I_prev = in_s
             else:
                 I_prev = images_prev[i] # 继承并上采样上一级传过来的图像
                 I_prev = imresize(I_prev, 1 / opt.scale_factor, opt)
@@ -80,13 +65,8 @@ def generate(Gs, Zs, images1, images2, NoiseAmp, opt, in_s=None, scale_v=1, scal
             # z_in = noise_amp * z_curr + real_curr #噪声 = 噪声+real图像
             # z_in = z_curr + real_curr  # 噪声 = 噪声+real图像
             z_in = noise_amp * z_curr+ real_curr
-            print("z_in:",end="")
-            print(z_in.size())
-            print("I_prev", end="")
-            print(I_prev.size())
             I_curr = G(z_in.detach(), I_prev)
-            print("I_curr", end="")
-            print(I_curr.size())
+
 
             if opt.mode == 'train':
                 dir2save = '%s/training_result/%s/gen_start_scale=%d' % (opt.out, opt.input_name[:-4], gen_start_scale)

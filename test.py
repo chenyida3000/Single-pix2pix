@@ -5,7 +5,7 @@ from utils.imresize import imresize
 from utils.imresize import imresize_to_shape
 import utils.functions as functions
 
-#运行代码：python test.py --input_name map1 --test_name test_map --paint_start_scale 1
+#运行代码：python test.py --input_name countryside --test_name countryside_test --paint_start_scale 1
 
 
 if __name__ == '__main__':
@@ -34,19 +34,18 @@ if __name__ == '__main__':
             os.makedirs(dir2save)
         except OSError:
             pass
-        image2 = functions.read_target_image(opt) #读入原始image2（在这个函数中只是用来为ref参考，做规格修改）
+        image2 = functions.read_target_image(opt) #读入原始image2（在这个函数中只是用来为test_images参考，做规格修改）
         image2 = functions.adjust_scales2image(image2, opt) # 根据原始image2决定scale
         Gs, Zs, images2, NoiseAmp = functions.load_trained_pyramid(opt)
 
         if (opt.paint_start_scale < 1) | (opt.paint_start_scale > (len(Gs)-1)):
             print("injection scale should be between 1 and %d" % (len(Gs)-1))
-        else: # 读取ref
+        else: # 读取test_image
             test_image = functions.read_image_dir('%s/%s' % (opt.test_dir, opt.test_name), opt)
             if test_image.shape[3] != image2.shape[3]:
                 test_image = imresize_to_shape(test_image, [image2.shape[2], image2.shape[3]], opt)
                 test_image = test_image[:, :, :image2.shape[2], :image2.shape[3]]
-            #修改ref并创建pyramid
-            test_image = imresize(test_image, opt.scale1, opt)
+            #修改test_image并创建pyramid
             test_images = functions.creat_reals_pyramid(test_image, test_images, opt)
             #下面是下采样到最低层，然后上采样到N-1层
             N = len(images2) - 1
@@ -55,6 +54,7 @@ if __name__ == '__main__':
             in_s = in_s[:, :, :images2[n - 1].shape[2], :images2[n - 1].shape[3]]
             in_s = imresize(in_s, 1 / opt.scale_factor, opt)
             in_s = in_s[:, :, :images2[n].shape[2], :images2[n].shape[3]]
+
             # if opt.quantization_flag:
             #     opt.mode = 'paint_train'
             #     dir2trained_model = functions.generate_dir2save(opt)
@@ -80,7 +80,7 @@ if __name__ == '__main__':
             #         opt.mode = 'paint2image'
             #out = generate(Gs[n:], Zs[n:], reals, NoiseAmp[n:], opt, in_s, n=n, num_samples=1)
             # plt.imsave('%s/in_s.png' % (dir2save), functions.convert_image_np(in_s.detach()), vmin=0, vmax=1)
-            out = generate(Gs[n:], Zs[n:], test_images[n:], images2, NoiseAmp[n:], opt, in_s, n=n,  num_samples=1) # 上采样后的ref作为in_s传入,这个函数一定要改!!!!!!!!!!!!!!!
+            out = generate(Gs[n:], Zs[n:], test_images[n:], images2, NoiseAmp[n:], opt, in_s, n=n,  num_samples=1)
             #plt.imsave('%s/start_scale=%d.png' % (dir2save, opt.paint_start_scale), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
             plt.imsave('%s/%s.png' % (dir2save, opt.test_name), functions.convert_image_np(out.detach()), vmin=0, vmax=1)
 
